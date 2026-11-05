@@ -11,3 +11,6 @@ dist/
 .local/
 test-results/
 playwright-report/
+.vercel/
+*.pem
+*.key

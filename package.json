@@ -11,13 +11,15 @@
     "db:test:concurrency": "node scripts/test-concurrency.mjs",
     "db:test:api": "node scripts/test-api.mjs",
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "node scripts/check-build-env.mjs && tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src e2e playwright.config.ts",
     "test": "vitest run",
     "demo:prepare": "node scripts/prepare-demo.mjs",
     "test:e2e": "npm run demo:prepare && playwright test",
-    "test:demo": "node --test scripts/demo-data.test.mjs"
+    "test:demo": "node --test scripts/demo-data.test.mjs",
+    "test:deployment": "node --test scripts/build-env.test.mjs",
+    "db:check:migrations": "node scripts/check-migrations-local.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
