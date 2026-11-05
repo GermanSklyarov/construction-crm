@@ -3,8 +3,10 @@ import { pathToFileURL } from 'node:url';
 // Explicit public metadata list; a VITE_VERCEL_ prefix is not permission to expose secrets.
 const vercelMetadata = new Set([
   'ENV', 'TARGET_ENV', 'URL', 'BRANCH_URL', 'PROJECT_PRODUCTION_URL', 'HASH_SALT',
+  // Vercel CLI 65 also injects identifiers and public browser telemetry options.
+  'DEPLOYMENT_ID', 'PROJECT_ID', 'OBSERVABILITY_CLIENT_CONFIG',
   'GIT_PROVIDER', 'GIT_REPO_SLUG', 'GIT_REPO_OWNER', 'GIT_REPO_ID',
-  'GIT_COMMIT_REF', 'GIT_COMMIT_SHA', 'GIT_COMMIT_MESSAGE',
+  'GIT_COMMIT_REF', 'GIT_COMMIT_SHA', 'GIT_PREVIOUS_SHA', 'GIT_COMMIT_MESSAGE',
   'GIT_COMMIT_AUTHOR_LOGIN', 'GIT_COMMIT_AUTHOR_NAME', 'GIT_PULL_REQUEST_ID',
 ].map(name => 'VITE_VERCEL_' + name));
 function jwtRole(value) {

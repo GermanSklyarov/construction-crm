@@ -117,3 +117,43 @@ test('CLI never echoes a malformed Supabase URL in diagnostics', () => {
   assert.match(result.output, /valid Supabase API URL/);
   assert.equal(result.output.includes('not-a-url-with-private-content'), false);
 });
+
+// Exact additional names reported by the failed Vercel CLI 65.11.0 build.
+const vercel65 = {
+  VITE_VERCEL_DEPLOYMENT_ID: 'dpl_example',
+  VITE_VERCEL_PROJECT_ID: 'prj_example',
+  VITE_VERCEL_GIT_PREVIOUS_SHA: '', // No successful previous build on first deployment.
+  VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG: JSON.stringify({
+    analytics: { scriptSrc: '/example/script.js', eventEndpoint: '/example/event', viewEndpoint: '/example/view' },
+    speedInsights: { scriptSrc: '/example/vitals.js', endpoint: '/example/vitals' },
+  }),
+};
+test('CLI accepts the four variables from the failed Vercel 65 build', () => {
+  for (const previous of ['', 'a'.repeat(40)]) {
+    const result = runCheck({ ...vercel65, VITE_VERCEL_GIT_PREVIOUS_SHA: previous });
+    assert.equal(result.status, 0, result.output);
+    assert.match(result.output, /environment validated/);
+    assert.equal(result.output.includes(vercel65.VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG), false);
+  }
+});
+test('new Vercel metadata does not allow unknown or secret variable names', () => {
+  for (const name of ['VITE_UNKNOWN', 'VITE_VERCEL_API_TOKEN', 'VITE_VERCEL_AUTOMATION_BYPASS_SECRET']) {
+    const result = runCheck({ ...vercel65, [name]: 'private-example-value' });
+    assert.equal(result.status, 1);
+    assert.ok(result.output.includes(name));
+    assert.equal(result.output.includes('private-example-value'), false);
+  }
+});
+test('every newly allowed Vercel field still rejects Supabase secret values', () => {
+  const jwt = 'x.' + Buffer.from(JSON.stringify({ role: 'service_role' })).toString('base64url') + '.x';
+  for (const name of Object.keys(vercel65)) {
+    for (const secret of ['sb_secret_example', jwt]) {
+      const value = name.endsWith('CLIENT_CONFIG') ? JSON.stringify({ analytics: { token: secret } }) : secret;
+      assert.throws(() => validateBuildEnv({ ...env, ...vercel65, [name]: value }, true), error => {
+        assert.match(error.message, /Secret Supabase credentials/);
+        assert.equal(error.message.includes(secret), false);
+        return true;
+      });
+    }
+  }
+});
