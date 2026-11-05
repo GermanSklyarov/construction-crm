@@ -13,7 +13,14 @@ function jwtRole(value) {
 }
 export function validateBuildEnv(env, hosted = false) {
   const allowed = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY'];
-  if (Object.keys(env).some(k => k.startsWith('VITE_') && !allowed.includes(k) && !vercelMetadata.has(k))) throw Error('Unexpected VITE_ variable; review browser exposure');
+  const unexpected = Object.keys(env)
+    .filter(name => name.startsWith('VITE_') && !allowed.includes(name) && !vercelMetadata.has(name))
+    .sort();
+  if (unexpected.length) {
+    // Names only: values may contain credentials, including for unknown variables.
+    const names = unexpected.map(name => /^[A-Z0-9_]+$/.test(name) ? name : '<invalid variable name>');
+    throw Error(`Unexpected VITE_ variable(s): ${names.join(', ')}. Remove them or review the explicit allowlist; values hidden.`);
+  }
   for (const [name, value] of Object.entries(env)) {
     if (!name.startsWith('VITE_')) continue;
     // Also check metadata values so renaming a key cannot bypass the protection.
@@ -24,7 +31,9 @@ export function validateBuildEnv(env, hosted = false) {
     }
   }
   if (!allowed.every(k => env[k])) throw Error('Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY before build');
-  const url = new URL(env.VITE_SUPABASE_URL);
+  let url;
+  try { url = new URL(env.VITE_SUPABASE_URL); }
+  catch { throw Error('VITE_SUPABASE_URL must be a valid Supabase API URL (value hidden)'); }
   const local = ['127.0.0.1', 'localhost'].includes(url.hostname);
   if (url.username || url.password || url.search || url.hash || url.pathname !== '/') throw Error('Use the Supabase API origin only');
   if (hosted && (url.protocol !== 'https:' || !/^[a-z]{20}\.supabase\.co$/.test(url.hostname))) throw Error('Vercel build requires the hosted Supabase HTTPS URL');
