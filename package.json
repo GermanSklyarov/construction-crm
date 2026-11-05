@@ -13,12 +13,18 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "vitest run"
+    "lint": "eslint src e2e playwright.config.ts",
+    "test": "vitest run",
+    "demo:prepare": "node scripts/prepare-demo.mjs",
+    "test:e2e": "npm run demo:prepare && playwright test",
+    "test:demo": "node --test scripts/demo-data.test.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.4",
     "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",

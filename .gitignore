@@ -8,3 +8,6 @@ supabase/.branches/
 coverage/
 
 dist/
+.local/
+test-results/
+playwright-report/

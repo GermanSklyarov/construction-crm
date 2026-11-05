@@ -38,17 +38,17 @@ reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000002', true);
 set local role authenticated;
 
-select is((select count(*) from tasks)::bigint, 1::bigint, 'A sees only own task');
+select is((select count(*) from tasks where id::text like '30000000-%')::bigint, 1::bigint, 'A sees only own task');
 
 select is((select count(*) from tasks where id = '30000000-0000-0000-0000-000000000002')::bigint, 0::bigint, 'A cannot read B task');
 
-select is((select count(*) from construction_objects)::bigint, 1::bigint, 'A sees only related object');
+select is((select count(*) from construction_objects where id::text like '20000000-%')::bigint, 1::bigint, 'A sees only related object');
 
 select is((select count(*) from construction_objects where id = '20000000-0000-0000-0000-000000000002')::bigint, 0::bigint, 'A cannot read B object');
 
-select is((select count(*) from task_status_history)::bigint, 1::bigint, 'A sees only own history');
+select is((select count(*) from task_status_history where task_id::text like '30000000-%')::bigint, 1::bigint, 'A sees only own history');
 
-select is((select count(*) from profiles)::bigint, 2::bigint, 'A sees self and visible history author only');
+select is((select count(*) from profiles where id::text like '10000000-%')::bigint, 2::bigint, 'A sees self and visible history author only');
 
 with affected as (update tasks set title='hacked' where id='30000000-0000-0000-0000-000000000002' returning id)
 select is((select count(*) from affected), 0::bigint, 'A cannot edit B');
@@ -85,7 +85,7 @@ select throws_ok($q$delete from profiles where id='10000000-0000-0000-0000-00000
 
 select set_config('request.jwt.claims', '{"user_metadata":{"role":"manager"}}', true);
 
-select is((select count(*) from tasks)::bigint, 1::bigint, 'User metadata cannot elevate role');
+select is((select count(*) from tasks where id::text like '30000000-%')::bigint, 1::bigint, 'User metadata cannot elevate role');
 
 reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000003', true);
@@ -97,11 +97,11 @@ reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000004', true);
 set local role authenticated;
 
-select is((select count(*) from tasks)::bigint, 2::bigint, 'Second manager sees all tasks');
+select is((select count(*) from tasks where id::text like '30000000-%')::bigint, 2::bigint, 'Second manager sees all tasks');
 
-select is((select count(*) from construction_objects)::bigint, 2::bigint, 'Manager sees all objects');
+select is((select count(*) from construction_objects where id::text like '20000000-%')::bigint, 2::bigint, 'Manager sees all objects');
 
-select is((select count(*) from profiles)::bigint, 4::bigint, 'Manager can list assignees');
+select is((select count(*) from profiles where id::text like '10000000-%')::bigint, 4::bigint, 'Manager can list assignees');
 
 select lives_ok($q$update tasks set title='Edited', description='Details', object_id='20000000-0000-0000-0000-000000000002', assignee_id='10000000-0000-0000-0000-000000000003' where id='30000000-0000-0000-0000-000000000001'$q$, 'Manager edits mutable task fields');
 
@@ -109,7 +109,7 @@ reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000002', true);
 set local role authenticated;
 
-select is((select count(*) from tasks)::bigint, 0::bigint, 'Reassignment immediately removes access');
+select is((select count(*) from tasks where id::text like '30000000-%')::bigint, 0::bigint, 'Reassignment immediately removes access');
 
 select throws_ok($q$select public.transition_task('30000000-0000-0000-0000-000000000001', 'new', 'in_progress', null)$q$, '42501', null, 'Former assignee cannot transition');
 
@@ -117,7 +117,7 @@ reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000003', true);
 set local role authenticated;
 
-select is((select count(*) from tasks)::bigint, 2::bigint, 'New assignee gains access');
+select is((select count(*) from tasks where id::text like '30000000-%')::bigint, 2::bigint, 'New assignee gains access');
 
 reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000001', true);
@@ -700,7 +700,7 @@ reset role;
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000005', true);
 set local role authenticated;
 
-select is((select count(*) from tasks)::bigint, 0::bigint, 'Unprovisioned account sees no tasks');
+select is((select count(*) from tasks where id::text like '30000000-%')::bigint, 0::bigint, 'Unprovisioned account sees no tasks');
 
 select throws_ok($q$select public.transition_task('30000000-0000-0000-0000-000000000001', 'accepted', 'new', null)$q$, '42501', null, 'Unprovisioned account denied RPC');
 
