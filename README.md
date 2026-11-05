@@ -1,10 +1,10 @@
 # construction-crm
 
-Мини-CRM «Объекты и задачи» для 2B Studio. Реализован этап 1: PostgreSQL/Supabase и безопасность. Frontend и деплой ещё не выполнялись.
+Мини-CRM «Объекты и задачи» для 2B Studio. Этапы 1–2: PostgreSQL/Supabase и клиент React.
 
 ## Локальная база
 
-Нужны Node.js 22+, npm и работающий Docker. Supabase CLI закреплён в devDependencies.
+Нужны Node.js 24 LTS, npm и работающий Docker. Supabase CLI закреплён в devDependencies.
 
 ```sh
 npm ci
@@ -33,3 +33,9 @@ values ('UUID_СОЗДАННОГО_AUTH_ПОЛЬЗОВАТЕЛЯ', 'Имя', 'ma
 Результаты текущего запуска: [docs/stage-1-report.md](docs/stage-1-report.md).
 
 Официальные справочники: [локальный Supabase](https://supabase.com/docs/guides/local-development), [pgTAP](https://supabase.com/docs/guides/database/testing), [блокировки SELECT FOR UPDATE](https://www.postgresql.org/docs/17/sql-select.html).
+
+## Frontend (этап 2)
+
+Скопируйте `.env.example` в `.env.local`. Укажите URL и **publishable key** локального Supabase из вывода CLI. Переменные VITE попадают в браузер. Для существующей локальной базы сначала примените новые миграции командой `npx supabase migration up --local`. Для входа нужен созданный в Auth пользователь с профилем в БД.
+
+`npm run dev` запускает CRM. Проверки frontend: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.

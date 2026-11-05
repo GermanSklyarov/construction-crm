@@ -9,10 +9,46 @@
     "db:test": "supabase test db",
     "db:lint": "supabase db lint --schema public,private --level warning --fail-on warning",
     "db:test:concurrency": "node scripts/test-concurrency.mjs",
-    "db:test:api": "node scripts/test-api.mjs"
+    "db:test:api": "node scripts/test-api.mjs",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.4",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jsdom": "^29.1.1",
     "pg": "8.16.3",
-    "supabase": "3.0.0"
+    "supabase": "3.0.0",
+    "tailwindcss": "^4.3.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^7.0.2",
+    "@radix-ui/react-slot": "^1.5.0",
+    "@supabase/supabase-js": "^2.119.0",
+    "@tanstack/react-query": "^5.106.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.68.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-hook-form": "^7.91.0",
+    "react-router-dom": "^7.18.5",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
